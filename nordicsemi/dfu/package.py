@@ -49,7 +49,6 @@ import hashlib
 
 
 # Nordic libraries
-from pc_ble_driver_py.exceptions import NordicSemiException
 from nordicsemi.dfu.nrfhex import nRFHex
 from nordicsemi.dfu.init_packet_pb import InitPacketPB, DFUType, CommandTypes, ValidationTypes, SigningTypes, HashTypes
 from nordicsemi.dfu.manifest import ManifestGenerator, Manifest
@@ -569,7 +568,7 @@ DFU Package: <{0}>:
         elif crc == 32:
             return binascii.crc32(data_buffer)
         else:
-            raise NordicSemiException("Invalid CRC type")
+            raise Exception("Invalid CRC type")
 
     @staticmethod
     def sign_firmware(key, firmware_filename):
@@ -627,21 +626,21 @@ DFU Package: <{0}>:
         """
 
         if not os.path.isfile(package_path):
-            raise NordicSemiException("Package {0} not found.".format(package_path))
+            raise Exception("Package  not found.")
 
         target_dir = os.path.abspath(target_dir)
         target_base_path = os.path.dirname(target_dir)
 
         if not os.path.exists(target_base_path):
-            raise NordicSemiException("Base path to target directory {0} does not exist.".format(target_base_path))
+            raise Exception("Base path to target directory  does not exist.")
 
         if not os.path.isdir(target_base_path):
-            raise NordicSemiException("Base path to target directory {0} is not a directory.".format(target_base_path))
+            raise Exception("Base path to target directory  is not a directory.")
 
         if os.path.exists(target_dir):
-            raise NordicSemiException(
-                "Target directory {0} exists, not able to unpack to that directory.",
-                target_dir)
+            raise Exception(
+                "Target directory  exists, not able to unpack to that directory."
+                )
 
         with ZipFile(package_path, 'r') as pkg:
             pkg.extractall(target_dir)

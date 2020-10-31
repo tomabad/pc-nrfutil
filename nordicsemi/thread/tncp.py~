@@ -86,9 +86,8 @@ class NCPTransport:
         for propid, value, py_format in args:
             logger.debug("Setting property %s to %s", self.__class__._propid_to_str(propid), str(value))
             result = self._wpan.prop_set_value(propid, value, py_format)
-            logger.debug("Result %s",str(result))
             if (result is None):
-                raise Exception("Failed to set property {}".format(self.__class__._propid_to_str(propid)))       
+                raise Exception("Failed to set property {}".format(self.__class__._propid_to_str(propid)))
             else:
                 logger.debug("Done")
 
@@ -214,26 +213,16 @@ class NCPTransport:
 
     def open(self):
         '''Opens transport for communication.'''
-        self._stream = StreamOpen('u', '/dev/ttyACM0', True)
+        self._stream = StreamOpen(self._stream_descriptor[0], self._stream_descriptor[1], False)
         # FIXME: remove node id from constructor after WpanAPI is refactored
-        print("stream_descriptor0 {0} streamdescriptor1 {1}".format(self._stream_descriptor[0], self._stream_descriptor[1])) 
         self._wpan = WpanApi(self._stream, 666)
         self._wpan.queue_register(SPINEL.HEADER_DEFAULT)
-        #self._wpan.queue_register(SPINEL.HEADER_ASYNC)
+        self._wpan.queue_register(SPINEL.HEADER_ASYNC)
         self._wpan.callback_register(SPINEL.PROP_STREAM_NET, self._wpan_receive)
 
-       # if (self._config[NCPTransport.CFG_KEY_RESET]) and not self._wpan.cmd_reset():
-        #    raise Exception('Failed to reset NCP. Please flash connectivity firmware.')
-        self._wpan.cmd_reset()
-        time.sleep(1)
-        self._wpan.cmd_reset()
-        time.sleep(1)
-
-        result = self._wpan.prop_set_value(SPINEL.PROP_IPv6_ICMP_PING_OFFLOAD,1)
-        if(result is None):
-            logger.debug("Failed to set property PROP_IPv6_ICMP_PING_OFFLOAD##### ")
-
-        self._wpan.prop_set_value(SPINEL.PROP_THREAD_RLOC16_DEBUG_PASSTHRU,1)
+        if (self._config[NCPTransport.CFG_KEY_RESET]) and not self._wpan.cmd_reset():
+            raise Exception('Failed to reset NCP. Please flash connectivity firmware.')
+       # time.sleep(1)
         logger.info('Attaching to the network')
         if (not self._attach_to_network()):
             logger.error("Failed to attach to the network")
